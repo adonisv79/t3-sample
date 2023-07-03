@@ -5,10 +5,10 @@ type sizes = "sm" | "md" | "lg";
 
 interface DonButtonProps {
   children?: ReactNode;
-  primary?: boolean;
-  size?: sizes;
   disabled?: boolean;
   onCLick: (x: MouseEvent<HTMLButtonElement>) => void;
+  primary?: boolean;
+  size?: sizes;
 }
 
 export const DonButton = ({
