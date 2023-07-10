@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  local-db:
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: t3sample
+      POSTGRES_USER: postgresql
+      POSTGRES_PASSWORD: postgresql
+    networks:
+      - localdb
+    volumes:
+      - ./tmp/docker_data/postgres/data:/var/lib/postgresql/data
+networks:
+  localdb:
