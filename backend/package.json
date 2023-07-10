@@ -6,6 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "dev:prisma:deploy": "prisma migrate deploy",
+    "dev:db:rm": "docker-compose rm -sfv local-chat-db",
+    "dev:db:up": "docker-compose up -d local-chat-db",
+    "dev:db:restart": "npm run dev:db:rm && npm run dev:db:up && sleep 1 && dev:prisma:deploy",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

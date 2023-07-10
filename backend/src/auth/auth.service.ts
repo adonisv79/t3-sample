@@ -1,8 +1,12 @@
 import { randomBytes, pbkdf2Sync } from 'crypto';
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthDto } from "./dto";
+import { Prisma } from '@prisma/client';
 
+function generateHash(salt: string, value: string) {
+    return pbkdf2Sync(value, salt, 1000, 64, `sha512`).toString(`hex`);
+}
 
 @Injectable()
 export class AuthService {
@@ -10,24 +14,39 @@ export class AuthService {
 
   async signUp(dto: AuthDto){
     const salt = randomBytes(16).toString('hex');
-    console.log(salt)
-    const hash = pbkdf2Sync(dto.password, salt, 1000, 64, `sha512`).toString(`hex`);
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        salt,
-        hash,
-        updatedAt: new Date()
-      },
-      select: {
-        id: true,
-        email: true
+    const hash = generateHash(salt, dto.password);
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          salt,
+          hash,
+          updatedAt: new Date()
+        },
+        select: {
+          id: true,
+          email: true
+        }
+      })
+      return user
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ForbiddenException('Credentials taken');
+        }
       }
-    })
-    return user
+
+      throw error;
+    }
   }
 
-  async signIn(){
+  async signIn(dto: AuthDto){
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email }
+    })
+    if (!user || (user.hash !== generateHash(user.salt, dto.password))) 
+      throw new ForbiddenException('Credentials invalid')
+
     return "hello"
   }
 }

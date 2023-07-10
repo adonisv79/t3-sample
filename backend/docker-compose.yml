@@ -1,16 +1,29 @@
 version: '3.8'
 services:
-  local-db:
+  local-chat-db:
+    container_name: t3sample_postgres
     image: postgres:alpine
+    restart: always
     ports:
-      - 5432:5432
+      - 5501:5432
     environment:
       POSTGRES_DB: t3sample
       POSTGRES_USER: postgresql
       POSTGRES_PASSWORD: postgresql
     networks:
-      - localdb
+      - local-chat-db
     volumes:
       - ./tmp/docker_data/postgres/data:/var/lib/postgresql/data
+  pgadmin:
+    container_name: t3sample_pgadmin4
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5502:80"
+    networks:
+      - local-chat-db
 networks:
-  localdb:
+  local-chat-db:
